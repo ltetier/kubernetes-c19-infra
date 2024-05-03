@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+spec:
+  schedule: "0 */2 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: gcs-credentials
+              secret:
+                secretName: gcs-credentials
+          imagePullSecrets:
+            - name: docker-hub-secret
+          containers:
+          - name: mongodb-backup
+            image: laurentt/backup-mongodb-gcs
+            command:
+              - "/bin/sh"
+              - "-c"
+              - |
+                echo "Authentification sur GCS."
+                gcloud auth activate-service-account --key-file=/etc/gcs-credentials/service-account.json
+                echo "Creation du dump..."
+                mongodump --uri=mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}/?readPreference=secondary --archive="/tmp/dump.gz" --gzip
+                echo "Dump créé !"
+                echo "upload dump on GCS..."
+                gsutil -m cp "/tmp/dump.gz" gs://backup-mongodb-formation-dyma
+                echo "Upload finished..."
+            volumeMounts:
+              - name: gcs-credentials
+                mountPath: /etc/gcs-credentials
+            env:
+              - name: MONGODB_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: mongodb
+                    key: mongodb-root-password
+              - name: MONGODB_USER
+                value: root
+              - name: MONGODB_HOST
+                value: mongodb-headless:27017
+          restartPolicy: OnFailure
