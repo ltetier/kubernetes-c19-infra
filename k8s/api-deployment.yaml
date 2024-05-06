@@ -32,8 +32,8 @@ spec:
       imagePullSecrets:
         - name: docker-hub-secret
       containers:
-      - name:  api
-        image:  laurentt/projet5-gke-node-api:latest
+      - name: api
+        image: laurentt/chap19-api-node
         ports:
           - containerPort:  80
         env:

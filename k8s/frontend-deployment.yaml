@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: laurentt/projet5-gke-vue
+        image: laurentt/chap19-frontend
         ports:
         - containerPort: 80
         volumeMounts:
