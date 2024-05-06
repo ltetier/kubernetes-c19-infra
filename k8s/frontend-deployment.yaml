@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: laurentt/chap19-frontend
+        image: laurentt/chap19-frontend:4cb5ac6
         ports:
         - containerPort: 80
         volumeMounts:
